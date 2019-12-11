@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Sample Food List</title>
+  <style>
+    body,a,* {
+      margin: 0; font-family: Verdana, Geneva, Tahoma, sans-serif;
+      box-sizing: border-box; text-decoration: none;
+    }
+    #app {
+      margin: auto; margin-top: 50px;
+      border: 1px solid grey; border-radius: 15px;
+      padding: 20px; width: 600px;
+    }
+    /* ==================== header */
+    input.new-todo {
+      border: none; border-bottom: 1px solid grey;
+      padding: 15px 0; width: 100%; font-size: 13px;
+    }
+    .filters {
+      display: flex; justify-content: space-between; margin: 15px 0;
+    }
+    .filters > div {
+      border: 1px solid grey; border-radius: 5px;
+      padding: 5px; width: 120px;
+      cursor: pointer; color: grey; text-align: center;
+    }
+    .filters > div:hover {
+      transform: scale(1.1);
+    }
+    .filters > div.selected {
+      color: black; font-weight: bold;
+    }
+    .filters div:nth-child(2){
+      color: green;
+    }
+    .filters div:nth-child(3){
+      color: orange;
+    }
+    .filters div:nth-child(4){
+      color: red;
+    }
+    /* ==================== list */
+    .todo-list {
+      padding-left: 0;
+    }
+    .todo-list li div.view {
+      display: inline;
+    }
+    /* delete */
+    .todo-list li {
+      border-bottom: 1px solid grey; 	padding: 10px 0;
+      list-style-type: none; font-size: 1.25rem;
+    }
+    .todo-list li .destroy {
+      display: none; border: none; font-size: 13px;
+    }
+    .todo-list li:hover .destroy {
+      display: inline; vertical-align: middle;
+      color: red; cursor: pointer;
+    }
+    /* editing */
+    .edit,
+    .todo-list li.editing .view {
+      display: none;
+    }
+    .todo-list li.editing {
+      border-bottom: none; padding: 0;
+    }
+    .todo-list li.editing .edit {
+      display: inline-block; 
+      background-color: aliceblue; 	font-size: inherit;
+      border: none; border-bottom: 1px solid grey;
+      padding: 10px; width: 85%;
+    }
+    /* mark avoid */
+    .todo-list li.avoid label {
+      color: red; text-decoration: line-through;
+    }
+    .todo-list li.moderate label {
+      color: orange; 
+    }
+    .todo-list li.okay label {
+      color: green; 
+    }
+    .todo-list li .toggle {
+      display: inline-block; width: 20px; height: 20px; cursor: pointer;
+    }
+    /* instruction */
+    ul.info {
+      margin-top: 15px; padding-left: 25px;
+      color: lightslategray; font-size: 13px;
+    }
+    .colorOption .green, 
+    .colorOption .orange, 
+    .colorOption .red {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+    }
+    .colorOption .green{
+      background-color: green;
+    }
+    .colorOption .orange{
+      background-color: orange;
+    }
+    .colorOption .red{
+      background-color: red;
+    }
+
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<body>
+  <div id='app'>
+    <header>
+      <h2>Sample Food List</h2>
+      <!-- v-model links data to model, so input value here is stored in the state onChange -->
+      <!-- @ = v-on links events to input, it looks for any keyUp action -->
+      <input class='new-todo' placeholder='Add food'
+        v-model='newTodo' v-on:keyup.enter='addTodo'/>
+      <section class='filters'>
+        <!-- .prevent is same as e.preventDefault() -->
+        <div v-on:click="visibility='all'"  :class="{ selected: visibility == 'all' }">All</div>
+        <div v-on:click="visibility='okay'" :class="{ selected: visibility == 'okay' }">Okay</div>
+        <div v-on:click="visibility='moderate'" :class="{ selected: visibility == 'moderate' }">Moderate</div>
+        <div v-on:click="visibility='avoid'" :class="{ selected: visibility == 'avoid' }">Avoid</div>
+      </section>
+    </header>
+
+    <ul class='todo-list'>
+      <!-- cc: use v-show for conditional rendering, instead of class name-->
+      <!-- v-for is like a forEach-->
+      <!-- if todo == editedTodo, then it adds the .editing class (reflect in css)-->
+      <!-- if editedTodo is false, .edit display:none in css -->
+      <div class='colorOption'>
+        <div class=' colorOption green'></div>
+        <div class=' colorOption orange'></div>
+        <div class=' colorOption red'></div>
+      </div>
+      <li v-for='(todo,index) in filteredTodos' :class='{ okay: todo.okay, avoid: todo.avoid, moderate: todo.moderate, editing: todo == editedTodo }'>
+        <input class='toggle' type='checkbox' name='input' v-model='todo.okay' />
+        <input class='toggle' type='checkbox' name='input' v-model='todo.moderate' />
+        <input class='toggle' type='checkbox' name='input' v-model='todo.avoid' />
+        <div class='view'>
+          <label v-on:click='editTodo(todo)'>{{todo.title}}</label>
+          <button class='destroy' v-on:click='removeTodo(todo)'>x</button>
+        </div>
+        <input class='edit' type='text'
+          v-model='todo.title' 
+          v-on:blur='doneEdit(todo)' 
+          v-on:keyup.enter='doneEdit(todo)'/>
+          <!-- cc: v-show='todo == editedTodo' -->
+      </li>
+    </ul>
+
+    <ul class='info'>
+      <li>Toggle the checkbox to mark accoding to color</li>
+      <li>Double-click the item to edit, then press Enter</li>
+      <li>Hover over a item to delete</li>
+    </ul>
+  </div>
+</body>
+<script>
+// making an instance for Vue
+// el is the entry point of the app
+new Vue({
+	el: '#app',
+	data() {
+		return {
+			newTodo: '',
+			todos: [ { id: 0, title: 'first todo', okay: false, avoid: false, moderate: false } ],
+			editedTodo: null,
+			visibility: 'all',
+		};
+	},
+	// lifecycle hooks
+	created() {
+		this.todos = JSON.parse(localStorage.getItem('vue-todo') || []);
+	},
+	computed: {
+		filteredTodos() {
+			if (this.visibility === 'all') {
+				// all
+				return this.todos;
+			} else if (this.visibility === 'okay') {
+				// okay
+				return this.todos.filter((todo) => {
+					return todo.okay;
+        });
+      } else if (this.visibility === 'moderate') {
+				// avoid
+				return this.todos.filter((todo) => {
+					return todo.moderate;
+				});
+			} else if (this.visibility === 'avoid') {
+				// avoid
+				return this.todos.filter((todo) => {
+					return todo.avoid;
+				});
+			}
+		},
+	},
+	methods: {
+		addTodo() {
+			this.todos.push({ id: this.todos.length, title: this.newTodo, okay: false, moderate: false, avoid: false });
+			this.newTodo = ''; // clear input box after enter
+			localStorage.setItem('vue-todo', JSON.stringify(this.todos));
+		},
+		removeTodo(todo) {
+			this.todos.splice(this.todos.indexOf(todo), 1);
+			localStorage.setItem('vue-todo', JSON.stringify(this.todos));
+		},
+		// double click
+		editTodo(todo) {
+			// put the targeted todo onto the editedTodo staging area
+			this.editedTodo = todo;
+		},
+		doneEdit(todo) {
+			this.editedTodo = null;
+			if (!todo.title) {
+				// remove todo index if input is empty
+				this.removeTodo(todo);
+			}
+			localStorage.setItem('vue-todo', JSON.stringify(this.todos));
+		},
+	},
+});
+</script>
+</html>
