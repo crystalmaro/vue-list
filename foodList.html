@@ -13,26 +13,27 @@
     #app {
       margin: auto; margin-top: 50px;
       border: 1px solid grey; border-radius: 15px;
-      padding: 20px; width: 600px;
+      padding: 20px; width: 80%;
     }
     /* ==================== header */
     input.new-todo {
       border: none; border-bottom: 1px solid grey;
-      padding: 15px 0; width: 100%; font-size: 13px;
+      padding: 15px 0; width: 100%; 
     }
     .filters {
-      display: flex; justify-content: space-between; margin: 15px 0;
+      display: flex; justify-content: space-evenly; margin: 10px 0;
+      flex-wrap: wrap;
     }
     .filters > div {
       border: 1px solid grey; border-radius: 5px;
-      padding: 5px; width: 120px;
+      width: 100px; margin: 1px 5px;
       cursor: pointer; color: grey; text-align: center;
     }
     .filters > div:hover {
       transform: scale(1.1);
     }
     .filters > div.selected {
-      color: black; font-weight: bold;
+      font-weight: bold;
     }
     .filters div:nth-child(2){
       color: green;
@@ -53,7 +54,7 @@
     /* delete */
     .todo-list li {
       border-bottom: 1px solid grey; 	padding: 10px 0;
-      list-style-type: none; font-size: 1.25rem;
+      list-style-type: none; 
     }
     .todo-list li .destroy {
       display: none; border: none; font-size: 13px;
@@ -117,7 +118,7 @@
 <body>
   <div id='app'>
     <header>
-      <h2>Sample Food List</h2>
+      <h4>Allergy Food List</h4>
       <!-- v-model links data to model, so input value here is stored in the state onChange -->
       <!-- @ = v-on links events to input, it looks for any keyUp action -->
       <input class='new-todo' placeholder='Add food'
